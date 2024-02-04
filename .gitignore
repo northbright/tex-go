@@ -5,6 +5,7 @@
 
 # Ignore Output Dir
 output
+out
 
 # Vue dist
 dist
