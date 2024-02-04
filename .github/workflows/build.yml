@@ -1,0 +1,73 @@
+# https://help.github.com/en/articles/workflow-syntax-for-github-actions
+
+name: Build
+
+on:
+- push
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+        - windows-2019
+        - windows-latest
+        - macos-12
+        - macos-latest
+        - ubuntu-20.04
+        - ubuntu-22.04
+        - ubuntu-latest
+        go:
+        - "1.21"
+
+      fail-fast: false
+    steps:
+    - name: Checkout source codes
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go }}
+
+    - name: Setup Texlive
+      uses: teatimeguest/setup-texlive-action@v3
+      with:
+        packages: >-
+          scheme-small
+          minted
+          keyval
+          ifthen
+          kvoptions
+          calc
+          fancyvrb
+          ifplatform
+          fvextra
+          pdftexcmds
+          upquote
+          etoolbox
+          float
+          xstring
+          xcolor
+          lineno
+          framed
+          shellesc
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10' 
+
+    - name: Setup pygmentize
+      run: python3 -m pip install pygments && pygmentize -V
+
+    - name: Check XeLaTex Version
+      run: xelatex --version
+
+    - name: Build
+      run: go build -v
+
+    - name: Test
+      run: go test -v ./...
